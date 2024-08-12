@@ -179,6 +179,45 @@
           </div>
         </div>
       </li>
+      <!-- ROI File -->
+      <li class="nav-item px-3">
+        <div id="igv-app-roi-dropdown" class="dropdown">
+          <a id="igv-app-roi-dropdown-button" class="dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+            ROI
+          </a>
+          <div id="igv-app-roi-dropdown-menu" class="dropdown-menu">
+            <!-- local file -->
+            <label class="dropdown-item btn btn-default btn-file">
+              <div class="igv-app-dropdown-item-cloud-storage">
+                <div>Local File ...</div>
+                <div>
+                  <input id="igv-app-roi-dropdown-local-track-file-input" type="file" name="file" multiple style="display: none;">
+                </div>
+              </div>
+            </label>
+            <!-- Dropbox -->
+            <div class="dropdown-item">
+              <div id="igv-app-dropdown-dropbox-roi-file-button" class="igv-app-dropdown-item-cloud-storage">
+                <div>Dropbox</div>
+                <div><img id="igv-app-roi-dropbox-button-image" width="18" height="18"></div>
+                <div>...</div>
+              </div>
+            </div>
+            <!-- Google Drive -->
+            <div class="dropdown-item">
+              <div id="igv-app-dropdown-google-drive-roi-file-button" class="igv-app-dropdown-item-cloud-storage">
+                <div>Google Drive</div>
+                <div><img id="igv-app-roi-google-drive-button-image" width="18" height="18"></div>
+                <div>...</div>
+              </div>
+            </div>
+            <!-- URL -->
+            <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#igv-app-roi-from-url-modal">
+              URL ...
+            </button>
+          </div>
+        </div>
+      </li>
       <!-- Session -->
       <li class="nav-item px-3">
         <div class="dropdown">
