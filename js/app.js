@@ -22,6 +22,7 @@
  */
 
 import igv from '../node_modules/igv/dist/igv.esm.min.js'
+import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import * as GoogleAuth from '../node_modules/google-utils/src/googleAuth.js'
 import makeDraggable from "./widgets/utils/draggable.js"
 import AlertSingleton from "./widgets/alertSingleton.js"
@@ -46,8 +47,7 @@ import {createSaveImageWidget} from './saveImageWidget.js'
 import GtexUtils from "./gtexUtils.js"
 import version from "./version.js"
 import {createCircularViewResizeModal} from "./circularViewResizeModal.js"
-import {createSampleInfoMenu} from "./services/sampleInfoService.js"
-import {createROIMenu} from "./services/roiService.js"
+import {createLoadDropdown} from "./widgets/loadWidget.js"
 
 document.addEventListener("DOMContentLoaded", async (event) => await main(document.getElementById('igv-app-container'), igvwebConfig))
 
@@ -58,6 +58,8 @@ const googleWarningFlag = "googleWarningShown"
 
 let svgSaveImageModal
 let pngSaveImageModal
+let roiURLModal
+let sampleInfoURLModal
 
 async function main(container, config) {
 
@@ -260,9 +262,55 @@ async function initializationHelper(browser, container, options) {
 
     await initializeGenomeWidgets(options.genomes)
 
-    createSampleInfoMenu(browser, document.getElementById('igv-main'), document.getElementById('igv-app-sample-info-dropdown-local-track-file-input'), initializeDropbox, options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-sample-info-file-button') : undefined, googleEnabled, document.getElementById('igv-app-dropdown-google-drive-sample-info-file-button'), 'igv-app-sample-info-from-url-modal')
+    const sampleInfoFileLoadHandler = async configuration => {
+        try {
+            await browser.loadSampleInfo(configuration)
+        } catch (e) {
+            console.error(e)
+            AlertSingleton.present(e)
+        }
+    }
 
-    createROIMenu(browser, document.getElementById('igv-main'), document.getElementById('igv-app-roi-dropdown-local-track-file-input'), initializeDropbox, options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-roi-file-button') : undefined, googleEnabled, document.getElementById('igv-app-dropdown-google-drive-roi-file-button'), 'igv-app-roi-from-url-modal')
+    const sampleInfoDropdownConfig =
+        {
+            igvMain: document.getElementById('igv-main'),
+            localFileInput: document.getElementById('igv-app-sample-info-dropdown-local-track-file-input'),
+            initializeDropbox,
+            dropboxButton: options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-sample-info-file-button') : undefined,
+            googleEnabled: googleEnabled,
+            googleDriveButton: document.getElementById('igv-app-dropdown-google-drive-sample-info-file-button'),
+            urlModalId: 'igv-app-sample-info-from-url-modal',
+            urlModalTitle: 'Sample Info',
+            loadHandler: sampleInfoFileLoadHandler
+        };
+
+    sampleInfoURLModal = createLoadDropdown(sampleInfoDropdownConfig)
+
+    const roiFileLoadHandler = async ({ url }) => {
+        try {
+            const roi = await igvxhr.loadJson(url)
+            roi.isUserDefined = true
+            browser.roiManager.loadROI(roi)
+        } catch (e) {
+            console.error(e)
+            AlertSingleton.present(e)
+        }
+    }
+
+    const roiDropdownConfig =
+        {
+        igvMain: document.getElementById('igv-main'),
+        localFileInput: document.getElementById('igv-app-roi-dropdown-local-track-file-input'),
+        initializeDropbox,
+        dropboxButton: options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-roi-file-button') : undefined,
+        googleEnabled: googleEnabled,
+        googleDriveButton: document.getElementById('igv-app-dropdown-google-drive-roi-file-button'),
+        urlModalId: 'igv-app-roi-from-url-modal',
+        urlModalTitle: 'ROI',
+        loadHandler: roiFileLoadHandler
+    };
+
+    roiURLModal = createLoadDropdown(roiDropdownConfig)
 
     const sessionSaver = () => {
         try {

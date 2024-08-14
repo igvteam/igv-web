@@ -1,21 +1,20 @@
-import FileLoadManager from "../widgets/fileLoadManager.js"
-import FileLoadWidget from "../widgets/fileLoadWidget.js"
-import * as Utils from "../widgets/utils.js"
-import AlertSingleton from "../widgets/alertSingleton.js"
 import * as GooglePicker from '../../node_modules/google-utils/src/googleFilePicker.js'
+import FileLoadManager from "./fileLoadManager.js"
+import FileLoadWidget from "./fileLoadWidget.js"
+import * as Utils from "./utils.js"
+import AlertSingleton from "./alertSingleton.js"
 
-let sampleInfoURLModal
-function createSampleInfoURLWidget(urlModalId, igvMain, sampleInfoFileLoadHandler) {
+function createURLWidget(igvMain, urlModalId, urlModalTitle, loadHandler) {
 
     const html =
-        `<div id="${urlModalId}" class="modal fade" tabindex="-1">
+        `<div id="${ urlModalId }" class="modal fade" tabindex="-1">
 
         <div class="modal-dialog modal-lg">
     
             <div class="modal-content">
     
                 <div class="modal-header">
-                    <div class="modal-title">Sample Info URL</div>
+                    <div class="modal-title">${ urlModalTitle }</div>
     
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     
@@ -43,7 +42,7 @@ function createSampleInfoURLWidget(urlModalId, igvMain, sampleInfoFileLoadHandle
     const fileLoadWidgetConfig =
         {
             widgetParent: urlModalElement.querySelector('.modal-body'),
-            dataTitle: 'Sample Info',
+            dataTitle: urlModalTitle,
             indexTitle: 'Index',
             mode: 'url',
             fileLoadManager: new FileLoadManager(),
@@ -53,31 +52,28 @@ function createSampleInfoURLWidget(urlModalId, igvMain, sampleInfoFileLoadHandle
 
     const fileLoadWidget = new FileLoadWidget(fileLoadWidgetConfig)
 
-    sampleInfoURLModal = new bootstrap.Modal(urlModalElement)
-    Utils.configureModal(fileLoadWidget, sampleInfoURLModal, async fileLoadWidget => {
+    const urlModal = new bootstrap.Modal(urlModalElement)
+
+    const urlModalHandler = async fileLoadWidget => {
         const paths = fileLoadWidget.retrievePaths()
-        await sampleInfoFileLoadHandler({url: paths[0]})
+        await loadHandler({url: paths[0]})
         return true
-    })
+    }
+
+    Utils.configureModal(fileLoadWidget, urlModal, urlModalHandler)
+
+    return urlModal
 }
 
-function createSampleInfoMenu(browser,
-                              igvMain,
-                              localFileInput,
-                              initializeDropbox,
-                              dropboxButton,
-                              googleEnabled,
-                              googleDriveButton,
-                              urlModalId) {
-
-    const sampleInfoFileLoadHandler = async configuration => {
-        try {
-            await browser.loadSampleInfo(configuration)
-        } catch (e) {
-            console.error(e)
-            AlertSingleton.present(e)
-        }
-    }
+function createLoadDropdown({ igvMain,
+                            localFileInput,
+                            initializeDropbox,
+                            dropboxButton,
+                            googleEnabled,
+                            googleDriveButton,
+                            urlModalId,
+                            urlModalTitle,
+                            loadHandler }) {
 
     // local file
     localFileInput.addEventListener('change', async () => {
@@ -88,7 +84,7 @@ function createSampleInfoMenu(browser,
 
         localFileInput.value = ''
 
-        await sampleInfoFileLoadHandler({url: paths[0]})
+        await loadHandler({url: paths[0]})
     })
 
     //  Dropbox
@@ -106,7 +102,7 @@ function createSampleInfoMenu(browser,
                             return {url: link}
                         })
 
-                        sampleInfoFileLoadHandler(configList[0])
+                        loadHandler(configList[0])
                     },
                     cancel: () => {
                     },
@@ -126,22 +122,20 @@ function createSampleInfoMenu(browser,
     if (!googleEnabled) {
         googleDriveButton.parentElement.style.display = 'none'
     } else {
-
         googleDriveButton.addEventListener('click', () => {
 
             const filePickerHandler = async responses => {
                 const paths = responses.map(({url}) => url)
-                await sampleInfoFileLoadHandler({url: paths[0]})
+                await loadHandler({url: paths[0]})
             }
 
             GooglePicker.createDropdownButtonPicker(false, filePickerHandler)
         })
-
     }
 
     // URL
-    createSampleInfoURLWidget(urlModalId, igvMain, sampleInfoFileLoadHandler)
+    return createURLWidget(igvMain, urlModalId, urlModalTitle, loadHandler)
 
 }
 
-export { createSampleInfoMenu }
+export { createLoadDropdown }
