@@ -2,11 +2,11 @@ import {ModalTable, GenericDataSource} from '../../node_modules/data-modal/src/i
 import {encodeTrackDatasourceConfigurator, supportsGenome} from './encodeTrackDatasourceConfigurator.js'
 import AlertSingleton from './alertSingleton.js'
 import {createGenericSelectModal} from './genericSelectModal.js'
-import {createTrackURLModalElement} from './trackURLModal.js'
 import FileLoadManager from "./fileLoadManager.js"
 import FileLoadWidget from "./fileLoadWidget.js"
 import MultipleTrackFileLoad from "./multipleTrackFileLoad.js"
 import * as Utils from './utils.js'
+import {createURLModalElement} from "./urlModal.js"
 
 let fileLoadWidget
 let multipleTrackFileLoad
@@ -37,7 +37,7 @@ function createTrackWidgetsWithTrackRegistry($igvMain,
                                              trackLoadHandler,
                                              trackMenuHandler) {
 
-    const urlModalElement = createTrackURLModalElement(urlModalId)
+    const urlModalElement = createURLModalElement(urlModalId, 'Track URL')
     $igvMain.get(0).appendChild(urlModalElement)
 
     let fileLoadWidgetConfig =
