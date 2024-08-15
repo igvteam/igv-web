@@ -26,7 +26,6 @@ import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import * as GoogleAuth from '../node_modules/google-utils/src/googleAuth.js'
 import makeDraggable from "./widgets/utils/draggable.js"
 import AlertSingleton from "./widgets/alertSingleton.js"
-import {createSessionWidgets} from "./widgets/sessionWidgets.js"
 import {
     updateTrackMenusWithTrackConfigurations,
     createTrackWidgetsWithTrackRegistry,
@@ -48,6 +47,7 @@ import GtexUtils from "./gtexUtils.js"
 import version from "./version.js"
 import {createCircularViewResizeModal} from "./circularViewResizeModal.js"
 import {createLoadDropdown} from "./widgets/loadWidget.js"
+import {createSessionLoadSaveDropdown} from "./widgets/sessionLoadSaveWidget.js"
 
 document.addEventListener("DOMContentLoaded", async (event) => await main(document.getElementById('igv-app-container'), igvwebConfig))
 
@@ -60,6 +60,8 @@ let svgSaveImageModal
 let pngSaveImageModal
 let roiURLModal
 let sampleInfoURLModal
+let sessionURLModal
+let sessionSaveModal
 
 async function main(container, config) {
 
@@ -233,8 +235,6 @@ async function initializationHelper(browser, container, options) {
 
     $('div#igv-session-dropdown-menu > :nth-child(2)').after(googleDriveDropdownItem('igv-app-dropdown-google-drive-session-file-button'))
 
-    const $igvMain = $('#igv-main')
-
     const genomeFileLoadConfig =
         {
             localFileInput: document.getElementById('igv-app-dropdown-local-genome-file-input'),
@@ -277,7 +277,7 @@ async function initializationHelper(browser, container, options) {
             localFileInput: document.getElementById('igv-app-sample-info-dropdown-local-track-file-input'),
             initializeDropbox,
             dropboxButton: options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-sample-info-file-button') : undefined,
-            googleEnabled: googleEnabled,
+            googleEnabled,
             googleDriveButton: document.getElementById('igv-app-dropdown-google-drive-sample-info-file-button'),
             urlModalId: 'igv-app-sample-info-from-url-modal',
             urlModalTitle: 'Sample Info',
@@ -303,7 +303,7 @@ async function initializationHelper(browser, container, options) {
         localFileInput: document.getElementById('igv-app-roi-dropdown-local-track-file-input'),
         initializeDropbox,
         dropboxButton: options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-roi-file-button') : undefined,
-        googleEnabled: googleEnabled,
+        googleEnabled,
         googleDriveButton: document.getElementById('igv-app-dropdown-google-drive-roi-file-button'),
         urlModalId: 'igv-app-roi-from-url-modal',
         urlModalTitle: 'ROI',
@@ -333,17 +333,21 @@ async function initializationHelper(browser, container, options) {
 
     }
 
-    createSessionWidgets($igvMain,
-        'igv-webapp',
-        'igv-app-dropdown-local-session-file-input',
+    const sessionDropdownConfig = {
+        igvMain: document.getElementById('igv-main'),
+        localFileInput: document.getElementById('igv-app-dropdown-local-session-file-input'),
         initializeDropbox,
-        options.dropboxAPIKey ? 'igv-app-dropdown-dropbox-session-file-button' : undefined,
-        'igv-app-dropdown-google-drive-session-file-button',
-        'igv-app-session-url-modal',
-        'igv-app-session-save-modal',
+        dropboxButton: options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-session-file-button') : undefined,
         googleEnabled,
-        sessionLoader,
-        sessionSaver)
+        googleDriveButton: document.getElementById('igv-app-dropdown-google-drive-session-file-button'),
+        urlModalId: 'igv-app-session-url-modal',
+        urlModalTitle: 'Session',
+        saveModalId: 'igv-app-session-save-modal',
+        loadHandler: sessionLoader,
+        saveHandler: sessionSaver
+    };
+
+    ({ sessionURLModal, sessionSaveModal } = createSessionLoadSaveDropdown(sessionDropdownConfig))
 
     svgSaveImageModal = new bootstrap.Modal(document.getElementById('igv-app-svg-save-modal'))
     createSaveImageWidget({ browser, saveModal: svgSaveImageModal, imageType: 'svg' })
