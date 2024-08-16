@@ -81,6 +81,7 @@ function createTrackWidgetsWithTrackRegistry($igvMain,
         const encodeModalTableConfig =
             {
                 id: modalID,
+                parent: $igvMain.get(0),
                 title: 'ENCODE',
                 selectionStyle: 'multi',
                 pageLength: 100,
@@ -93,6 +94,7 @@ function createTrackWidgetsWithTrackRegistry($igvMain,
 
     customModalTable = new ModalTable({
         id: 'igv-custom-modal',
+        parent: $igvMain.get(0),
         title: 'UNTITLED',
         okHandler: trackLoadHandler, ...defaultCustomModalTableConfig
     })

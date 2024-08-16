@@ -37,9 +37,8 @@ import {
     googleDriveButtonImageBase64,
     googleDriveDropdownItem
 } from "./widgets/markupFactory.js"
-import GenomeFileLoad from "./widgets/genomeFileLoad.js"
 import Globals from "./globals.js"
-import {createGenomeWidgets, initializeGenomeWidgets, loadGenome} from './widgets/genomeWidgets.js'
+import {createGenomeLoadDropdown, initializeGenomeWidgets, loadGenome} from './widgets/genomeLoadWidgets.js'
 import {createShareWidgets, shareWidgetConfigurator} from './shareWidgets.js'
 import {sessionURL} from './shareHelper.js'
 import {createSaveImageWidget} from './saveImageWidget.js'
@@ -235,30 +234,27 @@ async function initializationHelper(browser, container, options) {
 
     $('div#igv-session-dropdown-menu > :nth-child(2)').after(googleDriveDropdownItem('igv-app-dropdown-google-drive-session-file-button'))
 
-    const genomeFileLoadConfig =
+    const genomeDropdpwnConfig =
         {
+            igvMain: document.getElementById('igv-main'),
             localFileInput: document.getElementById('igv-app-dropdown-local-genome-file-input'),
             initializeDropbox,
             dropboxButton: options.dropboxAPIKey ? document.getElementById('igv-app-dropdown-dropbox-genome-file-button') : undefined,
-            googleEnabled: googleEnabled,
+            googleEnabled,
             googleDriveButton: document.getElementById('igv-app-dropdown-google-drive-genome-file-button'),
+            urlModalId: 'igv-app-genome-from-url-modal',
+            urlModalTitle: 'Genome URL',
+            genarkModalId: 'igv-app-genome-genark-modal',
+            genarkModalTitle: 'UCSC GenArk',
             loadHandler: async configuration => {
-
                 if (configuration.id !== browser.genome.id) {
                     await loadGenome(configuration)
                 }
-
             }
-
         }
 
     // Create widgets for URL and File loads.
-    createGenomeWidgets({
-        igvMain: document.getElementById('igv-main'),
-        urlModalId: 'igv-app-genome-from-url-modal',
-        genarkModalId: 'igv-app-genome-genark-modal',
-        genomeFileLoad: new GenomeFileLoad(genomeFileLoadConfig)
-    })
+    createGenomeLoadDropdown(genomeDropdpwnConfig)
 
     await initializeGenomeWidgets(options.genomes)
 
