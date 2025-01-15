@@ -18,7 +18,7 @@
   "homepage": "https://github.com/igvteam/igv-webapp#readme",
   "devDependencies": {
     "fs-extra": "^8.1.0",
-    "igv": "^3.1.2",
+    "igv": "github:igvteam/igv.js#jquery-cleanse",
     "data-modal": "github:igvteam/data-modal#v1.6.1",
     "igv-utils": "github:igvteam/igv-utils#v1.5.8",
     "google-utils": "github:igvteam/google-utils#v1.0.2",
